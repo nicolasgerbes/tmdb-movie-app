@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Aplicação de filmes integrada à API do TMDB"
+    >
+
+    <title>MovieHub | Descubra novos filmes</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuração personalizada do Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#e50914",
+                        background: "#09090b",
+                        surface: "#18181b"
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="min-h-screen bg-background text-white">
+
+    <!-- Cabeçalho -->
+    <header class="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-background/90 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
+            <a
+                href="#"
+                class="text-2xl font-black tracking-tight text-primary"
+            >
+                MovieHub
+            </a>
+
+            <nav class="hidden items-center gap-8 md:flex">
+                <a
+                    href="#inicio"
+                    class="text-sm font-medium text-white transition hover:text-primary"
+                >
+                    Início
+                </a>
+
+                <a
+                    href="#populares"
+                    class="text-sm font-medium text-zinc-400 transition hover:text-white"
+                >
+                    Populares
+                </a>
+
+                <a
+                    href="#lancamentos"
+                    class="text-sm font-medium text-zinc-400 transition hover:text-white"
+                >
+                    Lançamentos
+                </a>
+
+                <a
+                    href="#sobre"
+                    class="text-sm font-medium text-zinc-400 transition hover:text-white"
+                >
+                    Sobre
+                </a>
+            </nav>
+
+            <button
+                id="menu-button"
+                type="button"
+                class="rounded-lg border border-white/10 p-2 text-white transition hover:bg-white/10 md:hidden"
+                aria-label="Abrir menu"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <line x1="4" x2="20" y1="6" y2="6"></line>
+                    <line x1="4" x2="20" y1="12" y2="12"></line>
+                    <line x1="4" x2="20" y1="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Menu mobile -->
+        <nav
+            id="mobile-menu"
+            class="hidden border-t border-white/10 bg-background px-6 py-5 md:hidden"
+        >
+            <div class="flex flex-col gap-4">
+                <a href="#inicio" class="text-white transition hover:text-primary">
+                    Início
+                </a>
+
+                <a href="#populares" class="text-zinc-400 transition hover:text-white">
+                    Populares
+                </a>
+
+                <a href="#lancamentos" class="text-zinc-400 transition hover:text-white">
+                    Lançamentos
+                </a>
+
+                <a href="#sobre" class="text-zinc-400 transition hover:text-white">
+                    Sobre
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- Hero -->
+        <section
+            id="inicio"
+            class="relative flex min-h-[720px] items-center overflow-hidden pt-20"
+        >
+        
+            <div
+                class="absolute inset-0 bg-cover bg-center"
+                style="
+                    background-image:
+                        linear-gradient(
+                            90deg,
+                            rgba(9, 9, 11, 1) 0%,
+                            rgba(9, 9, 11, 0.85) 45%,
+                            rgba(9, 9, 11, 0.2) 100%
+                        ),
+                        linear-gradient(
+                            0deg,
+                            rgba(9, 9, 11, 1) 0%,
+                            transparent 50%
+                        ),
+                        url('https://image.tmdb.org/t/p/original/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg');
+                "
+            ></div>
+
+            <div class="relative z-10 mx-auto w-full max-w-7xl px-6 py-24">
+                <div class="max-w-2xl">
+
+                    <span class="mb-5 inline-flex rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                        Filme em destaque
+                    </span>
+
+                    <h1 class="text-4xl font-black leading-tight sm:text-5xl lg:text-7xl">
+                        Descubra histórias que valem a pena assistir
+                    </h1>
+
+                    <p class="mt-6 max-w-xl text-base leading-7 text-zinc-300 sm:text-lg">
+                        Explore filmes populares, lançamentos e informações
+                        detalhadas utilizando dados da API oficial do TMDB.
+                    </p>
+
+                    <!-- Busca -->
+                    <form
+                        id="search-form"
+                        class="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+                    >
+                        <label for="search-input" class="sr-only">
+                            Pesquisar filme
+                        </label>
+
+                        <input
+                            id="search-input"
+                            type="search"
+                            placeholder="Pesquise por um filme..."
+                            class="w-full rounded-xl border border-white/10 bg-white/10 px-5 py-4 text-white outline-none backdrop-blur-sm transition placeholder:text-zinc-400 focus:border-primary focus:ring-2 focus:ring-primary/30"
+                        >
+
+                        <button
+                            type="submit"
+                            class="rounded-xl bg-primary px-7 py-4 font-bold text-white transition hover:bg-red-700 active:scale-95"
+                        >
+                            Pesquisar
+                        </button>
+                    </form>
+
+                    <div class="mt-7 flex flex-wrap items-center gap-5 text-sm text-zinc-400">
+                        <span>🎬 Filmes populares</span>
+                        <span>⭐ Avaliações</span>
+                        <span>📅 Lançamentos</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filmes populares -->
+        <section
+            id="populares"
+            class="mx-auto max-w-7xl px-6 py-20"
+        >
+            <div class="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-widest text-primary">
+                        Em alta
+                    </span>
+
+                    <h2 class="mt-2 text-3xl font-black sm:text-4xl">
+                        Filmes populares
+                    </h2>
+
+                    <p class="mt-3 text-zinc-400">
+                        Os filmes mais assistidos e comentados do momento.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="self-start rounded-lg border border-white/10 px-5 py-3 text-sm font-semibold transition hover:border-primary hover:text-primary"
+                >
+                    Ver todos
+                </button>
+            </div>
+
+            <!-- Os cards serão inseridos pelo JavaScript futuramente -->
+            <div
+                id="movies-container"
+                class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            >
+
+                <!-- Card provisório 1 -->
+                <article class="group cursor-pointer overflow-hidden rounded-xl bg-surface">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img
+                            src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
+                            alt="Pôster do filme Batman: O Cavaleiro das Trevas"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        >
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+
+                        <span class="absolute right-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-yellow-400 backdrop-blur">
+                            ⭐ 8.5
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="truncate font-bold transition group-hover:text-primary">
+                            Batman: O Cavaleiro das Trevas
+                        </h3>
+
+                        <p class="mt-2 text-sm text-zinc-400">
+                            2008
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Card provisório 2 -->
+                <article class="group cursor-pointer overflow-hidden rounded-xl bg-surface">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img
+                            src="https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+                            alt="Pôster do filme A Origem"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        >
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+
+                        <span class="absolute right-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-yellow-400 backdrop-blur">
+                            ⭐ 8.4
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="truncate font-bold transition group-hover:text-primary">
+                            A Origem
+                        </h3>
+
+                        <p class="mt-2 text-sm text-zinc-400">
+                            2010
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Card provisório 3 -->
+                <article class="group cursor-pointer overflow-hidden rounded-xl bg-surface">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img
+                            src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+                            alt="Pôster do filme Duna: Parte Dois"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        >
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+
+                        <span class="absolute right-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-yellow-400 backdrop-blur">
+                            ⭐ 8.1
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="truncate font-bold transition group-hover:text-primary">
+                            Duna: Parte Dois
+                        </h3>
+
+                        <p class="mt-2 text-sm text-zinc-400">
+                            2024
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Card provisório 4 -->
+                <article class="group cursor-pointer overflow-hidden rounded-xl bg-surface">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img
+                            src="https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg"
+                            alt="Pôster do filme Coringa"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        >
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+
+                        <span class="absolute right-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-yellow-400 backdrop-blur">
+                            ⭐ 8.2
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="truncate font-bold transition group-hover:text-primary">
+                            Coringa
+                        </h3>
+
+                        <p class="mt-2 text-sm text-zinc-400">
+                            2019
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Card provisório 5 -->
+                <article class="group cursor-pointer overflow-hidden rounded-xl bg-surface">
+                    <div class="relative aspect-[2/3] overflow-hidden">
+                        <img
+                            src="https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg"
+                            alt="Pôster do filme Parasita"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        >
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+
+                        <span class="absolute right-3 top-3 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-yellow-400 backdrop-blur">
+                            ⭐ 8.5
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="truncate font-bold transition group-hover:text-primary">
+                            Parasita
+                        </h3>
+
+                        <p class="mt-2 text-sm text-zinc-400">
+                            2019
+                        </p>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- Sobre -->
+        <section
+            id="sobre"
+            class="border-y border-white/10 bg-surface/60"
+        >
+            <div class="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-2 md:items-center">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-widest text-primary">
+                        Sobre o projeto
+                    </span>
+
+                    <h2 class="mt-3 text-3xl font-black sm:text-4xl">
+                        Informações de filmes em um só lugar
+                    </h2>
+                </div>
+
+                <p class="leading-8 text-zinc-400">
+                    Este projeto utiliza a API do TMDB para buscar filmes,
+                    avaliações, imagens, datas de lançamento e detalhes das
+                    produções. A interface foi criada com HTML, JavaScript e
+                    Tailwind CSS.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="mx-auto max-w-7xl px-6 py-10">
+        <div class="flex flex-col justify-between gap-5 border-t border-white/10 pt-8 sm:flex-row sm:items-center">
+            <a
+                href="#"
+                class="text-xl font-black text-primary"
+            >
+                MovieHub
+            </a>
+
+            <p class="text-sm text-zinc-500">
+                Projeto desenvolvido para fins educacionais utilizando a API do TMDB.
+            </p>
+        </div>
+    </footer>
+
+    <script src="./js/main.js"></script>
+</body>
+</html>
